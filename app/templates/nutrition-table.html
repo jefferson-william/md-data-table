@@ -34,15 +34,13 @@
         <td>{{dessert.fat.value | number: 2}}</td>
         <td>{{dessert.carbs.value}}</td>
         <td>{{dessert.protein.value | number: 2}}</td>
-        <td>{{dessert.sodium.value}}</td>
-        <td show-unit>{{dessert.calcium.value}}</td>
         <td show-unit hide-sm>{{dessert.iron.value}}</td>
       </tr>
     </tbody>
   </table>
 </md-data-table-container>
 
-<md-data-table-pagination md-limit="query.limit" md-page="query.page" md-total="{{desserts.count}}" md-trigger="onpagechange"></md-data-table-pagination>
+<md-data-table-pagination md-row-select="[10, 20, 50, 100]" md-limit="query.limit" md-page="query.page" md-total="{{desserts.count}}" md-trigger="onpagechange"></md-data-table-pagination>
 
 <md-data-table-toolbar >
   <md-button ng-click="loadStuff()">Trigger Outside Event</md-button>

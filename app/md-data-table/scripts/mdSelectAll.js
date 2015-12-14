@@ -1,54 +1,87 @@
 angular.module('md.data.table').directive('mdSelectAll', mdSelectAll);
 
-function mdSelectAll() {
+function mdSelectAll($mdTable) {
   'use strict';
-  
+
   function template(tElement) {
     var checkbox = angular.element('<md-checkbox></md-checkbox>');
-    
+
     checkbox.attr('aria-label', 'Select All');
     checkbox.attr('ng-click', 'toggleAll()');
     checkbox.attr('ng-class', 'mdClasses');
     checkbox.attr('ng-checked', 'allSelected()');
     checkbox.attr('ng-disabled', '!getCount()');
-    
+
     tElement.append(checkbox);
   }
-  
+
   function postLink(scope, element, attrs, tableCtrl) {
     var count = 0;
-    
+    var amountSelectedNotInPage = 0;
+    var lastPageNumCount = null;
+    var lastPageNumAll = null;
+
     var getSelectableItems = function() {
-      return scope.items.filter(function (item) {
+      return scope.items.filter(function(item) {
         return !tableCtrl.isDisabled(item);
       });
     };
-    
-    tableCtrl.isReady.body.promise.then(function () {
+
+    tableCtrl.isReady.body.promise.then(function() {
       scope.mdClasses = tableCtrl.classes;
-      
+
       scope.getCount = function() {
-        return (count = scope.items.reduce(function(sum, item) {
+        if (lastPageNumCount === tableCtrl.pageNum) {
+          return count;
+        }
+        lastPageNumCount = tableCtrl.pageNum;
+        var array = scope.items || [];
+
+        return (count = array.reduce(function(sum, item) {
           return tableCtrl.isDisabled(item) ? sum : ++sum;
         }, 0));
       };
-      
-      scope.allSelected = function () {
-        return count && count === tableCtrl.selectedItems.length;
+
+      scope.allSelected = function() {
+        if (lastPageNumAll === tableCtrl.pageNum) {
+          return count === tableCtrl.selectedItems.length - amountSelectedNotInPage;
+        }
+        lastPageNumAll = tableCtrl.pageNum;
+
+        var selectedCountInPage = 0;
+        var array = scope.items || [];
+
+        for (var i = 0, len = array.length; i < len; ++i) {
+          if (tableCtrl.selectedMap[array[i].id] !== undefined) {
+            ++selectedCountInPage;
+          }
+        }
+        amountSelectedNotInPage = tableCtrl.selectedItems.length - selectedCountInPage;
+
+        return count === selectedCountInPage;
       };
-      
-      scope.toggleAll = function () {
-        var selectableItems = getSelectableItems(scope.items);
-        
-        if(selectableItems.length === tableCtrl.selectedItems.length) {
-          tableCtrl.selectedItems.splice(0);
+
+      scope.toggleAll = function() {
+        var items = getSelectableItems(scope.items);
+        var map = tableCtrl.selectedMap;
+
+        if (scope.allSelected()) {
+          for (var i = 0, len = items.length; i < len; ++i) {
+            if (map[items[i].id] !== undefined) {
+              $mdTable.deselectRow(items[i], tableCtrl);
+            }
+          }
         } else {
-          tableCtrl.selectedItems = selectableItems;
+          for (var i = 0, len = items.length; i < len; ++i) {
+            if (map[items[i].id] === undefined) {
+              $mdTable.selectRow(items[i], tableCtrl);
+            }
+          }
         }
       };
     });
   }
-  
+
   return {
     link: postLink,
     require: '^^mdDataTable',
