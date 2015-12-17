@@ -108,7 +108,10 @@ function mdDataTable($mdTable) {
 
     self.resolve = function () {
       self.deferred = undefined;
-      self.pageNum = self.newPage;
+      if (self.clearSelectAllCache) {
+        self.clearSelectAllCache();
+      }
+
       if(self.hideProgress) {
         self.hideProgress();
       }

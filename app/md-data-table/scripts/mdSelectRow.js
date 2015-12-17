@@ -10,7 +10,7 @@ function mdSelectRow($mdTable) {
     checkbox.attr('aria-label', 'Select Row');
     checkbox.attr('ng-click', 'toggleRow(' + ngRepeat.item + ', $event)');
     checkbox.attr('ng-class', 'mdClasses');
-    checkbox.attr('ng-checked', 'selectedMap[' + ngRepeat.item + '.id] !== undefined');
+    checkbox.attr('ng-checked', 'isSelected(item)');
 
     if(tAttrs.mdDisableSelect) {
       checkbox.attr('ng-disabled', 'isDisabled()');
@@ -22,7 +22,7 @@ function mdSelectRow($mdTable) {
       tAttrs.$set('ngClick', 'toggleRow(' + ngRepeat.item + ', $event)');
     }
 
-    tAttrs.$set('ngClass', '{\'md-selected\': selectedMap[' + ngRepeat.item + '.id] !== undefined}');
+    tAttrs.$set('ngClass', '{\'md-selected\': isSelected(item)}');
   }
 
   function postLink(scope, element, attrs, tableCtrl) {

@@ -15,6 +15,7 @@ function mdTableRow($mdTable, $timeout) {
       };
 
       scope.isSelected = function (item) {
+        console.count();
         return tableCtrl.selectedMap[item.id] !== undefined;
       };
 

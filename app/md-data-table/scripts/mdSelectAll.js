@@ -16,10 +16,13 @@ function mdSelectAll($mdTable) {
   }
 
   function postLink(scope, element, attrs, tableCtrl) {
-    var count = 0;
-    var amountSelectedNotInPage = 0;
-    var lastPageNumCount = null;
-    var lastPageNumAll = null;
+    var count = null;
+    var amountSelectedNotInPage = null;
+
+    tableCtrl.clearSelectAllCache = function() {
+      count = null;
+      amountSelectedNotInPage = null;
+    };
 
     var getSelectableItems = function() {
       return scope.items.filter(function(item) {
@@ -31,10 +34,9 @@ function mdSelectAll($mdTable) {
       scope.mdClasses = tableCtrl.classes;
 
       scope.getCount = function() {
-        if (lastPageNumCount === tableCtrl.pageNum) {
+        if (count !== null) {
           return count;
         }
-        lastPageNumCount = tableCtrl.pageNum;
         var array = scope.items || [];
 
         return (count = array.reduce(function(sum, item) {
@@ -43,10 +45,9 @@ function mdSelectAll($mdTable) {
       };
 
       scope.allSelected = function() {
-        if (lastPageNumAll === tableCtrl.pageNum) {
+        if (amountSelectedNotInPage !== null) {
           return count === tableCtrl.selectedItems.length - amountSelectedNotInPage;
         }
-        lastPageNumAll = tableCtrl.pageNum;
 
         var selectedCountInPage = 0;
         var array = scope.items || [];
@@ -66,7 +67,7 @@ function mdSelectAll($mdTable) {
         var map = tableCtrl.selectedMap;
 
         if (scope.allSelected()) {
-          for (var i = 0, len = items.length; i < len; ++i) {
+          for (var i = items.length-1; i >= 0; --i) {
             if (map[items[i].id] !== undefined) {
               $mdTable.deselectRow(items[i], tableCtrl);
             }
