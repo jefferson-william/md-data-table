@@ -117,6 +117,21 @@ function mdDataTable($mdTable) {
       }
     };
 
+    $scope.$watch(function() {
+      return self.selectedItems;
+    }, function() {
+      if (self.selectedItems) {
+        if (self.selectedItems.length === 0) {
+          self.clearSelectAllCache();
+          self.selectedMap = {};
+        } else {
+          for(var i = 0, len = self.selectedItems.length; i < len; ++i) {
+            self.selectedMap[self.selectedItems[i].id] = i;
+          }
+        }
+      }
+    });
+
     self.isLastChild = function (siblings, child) {
       return Array.prototype.indexOf.call(siblings, child) === siblings.length - 1;
     };
