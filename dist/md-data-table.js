@@ -201,11 +201,29 @@ function mdDataTable($mdTable) {
 
     self.resolve = function () {
       self.deferred = undefined;
-      self.pageNum = self.newPage;
+      if (self.clearSelectAllCache) {
+        self.clearSelectAllCache();
+      }
+
       if(self.hideProgress) {
         self.hideProgress();
       }
     };
+
+    $scope.$watch(function() {
+      return self.selectedItems;
+    }, function() {
+      if (self.selectedItems) {
+        if (self.selectedItems.length === 0) {
+          self.clearSelectAllCache();
+          self.selectedMap = {};
+        } else {
+          for(var i = 0, len = self.selectedItems.length; i < len; ++i) {
+            self.selectedMap[self.selectedItems[i].id] = i;
+          }
+        }
+      }
+    });
 
     self.isLastChild = function (siblings, child) {
       return Array.prototype.indexOf.call(siblings, child) === siblings.length - 1;
@@ -725,10 +743,13 @@ function mdSelectAll($mdTable) {
   }
 
   function postLink(scope, element, attrs, tableCtrl) {
-    var count = 0;
-    var amountSelectedNotInPage = 0;
-    var lastPageNumCount = null;
-    var lastPageNumAll = null;
+    var count = null;
+    var amountSelectedNotInPage = null;
+
+    tableCtrl.clearSelectAllCache = function() {
+      count = null;
+      amountSelectedNotInPage = null;
+    };
 
     var getSelectableItems = function() {
       return scope.items.filter(function(item) {
@@ -740,10 +761,9 @@ function mdSelectAll($mdTable) {
       scope.mdClasses = tableCtrl.classes;
 
       scope.getCount = function() {
-        if (lastPageNumCount === tableCtrl.pageNum) {
+        if (count !== null) {
           return count;
         }
-        lastPageNumCount = tableCtrl.pageNum;
         var array = scope.items || [];
 
         return (count = array.reduce(function(sum, item) {
@@ -752,10 +772,9 @@ function mdSelectAll($mdTable) {
       };
 
       scope.allSelected = function() {
-        if (lastPageNumAll === tableCtrl.pageNum) {
+        if (amountSelectedNotInPage !== null) {
           return count === tableCtrl.selectedItems.length - amountSelectedNotInPage;
         }
-        lastPageNumAll = tableCtrl.pageNum;
 
         var selectedCountInPage = 0;
         var array = scope.items || [];
@@ -775,7 +794,7 @@ function mdSelectAll($mdTable) {
         var map = tableCtrl.selectedMap;
 
         if (scope.allSelected()) {
-          for (var i = 0, len = items.length; i < len; ++i) {
+          for (var i = items.length-1; i >= 0; --i) {
             if (map[items[i].id] !== undefined) {
               $mdTable.deselectRow(items[i], tableCtrl);
             }
@@ -814,7 +833,7 @@ function mdSelectRow($mdTable) {
     checkbox.attr('aria-label', 'Select Row');
     checkbox.attr('ng-click', 'toggleRow(' + ngRepeat.item + ', $event)');
     checkbox.attr('ng-class', 'mdClasses');
-    checkbox.attr('ng-checked', 'selectedMap[' + ngRepeat.item + '.id] !== undefined');
+    checkbox.attr('ng-checked', 'isSelected(item)');
 
     if(tAttrs.mdDisableSelect) {
       checkbox.attr('ng-disabled', 'isDisabled()');
@@ -826,7 +845,7 @@ function mdSelectRow($mdTable) {
       tAttrs.$set('ngClick', 'toggleRow(' + ngRepeat.item + ', $event)');
     }
 
-    tAttrs.$set('ngClass', '{\'md-selected\': selectedMap[' + ngRepeat.item + '.id] !== undefined}');
+    tAttrs.$set('ngClass', '{\'md-selected\': isSelected(item)}');
   }
 
   function postLink(scope, element, attrs, tableCtrl) {
