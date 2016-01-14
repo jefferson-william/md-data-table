@@ -67,15 +67,15 @@ function mdSelectAll($mdTable) {
         var map = tableCtrl.selectedMap;
 
         if (scope.allSelected()) {
-          for (var i = items.length-1; i >= 0; --i) {
+          for (var i = items.length - 1; i >= 0; --i) {
             if (map[items[i].id] !== undefined) {
               $mdTable.deselectRow(items[i], tableCtrl);
             }
           }
         } else {
-          for (var i = 0, len = items.length; i < len; ++i) {
-            if (map[items[i].id] === undefined) {
-              $mdTable.selectRow(items[i], tableCtrl);
+          for (var j = 0, len = items.length; j < len; ++j) {
+            if (map[items[j].id] === undefined) {
+              $mdTable.selectRow(items[j], tableCtrl);
             }
           }
         }
@@ -93,4 +93,4 @@ function mdSelectAll($mdTable) {
   };
 }
 
-mdSelectRow.$inject = ['$mdTable'];
+mdSelectAll.$inject = ['$mdTable'];
