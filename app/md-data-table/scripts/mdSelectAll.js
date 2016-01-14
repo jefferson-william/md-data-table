@@ -92,3 +92,5 @@ function mdSelectAll($mdTable) {
     template: template
   };
 }
+
+mdSelectRow.$inject = ['$mdTable'];
